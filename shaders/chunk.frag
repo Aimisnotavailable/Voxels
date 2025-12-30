@@ -2,7 +2,21 @@
 
 layout (location=0) out vec4 fragColor;
 
+uniform sampler2D u_texture_0;
+
+// remember to use linear gamma corrections for textures
+const vec3 gamma = vec3(2.2);
+const vec3 inv_gamma = 1 / gamma;
+
 in vec3 voxel_color;
+in vec2 uv;
+
 void main(){
-    fragColor = vec4(voxel_color, 1);
+    vec3 tex_col = texture(u_texture_0, uv).rgb;
+    tex_col = pow(tex_col, gamma);
+
+    tex_col.rgb *= voxel_color;
+
+    tex_col = pow(tex_col, inv_gamma);
+    fragColor = vec4(tex_col, 1);
 }
