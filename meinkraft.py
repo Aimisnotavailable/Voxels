@@ -20,7 +20,7 @@ class VoxelEngine:
 
         self.ctx = mgl.create_context()
 
-        self.ctx.enable(flags=mgl.DEPTH_TEST |  mgl.CULL_FACE | mgl.BLEND)
+        self.ctx.enable(flags=mgl.DEPTH_TEST | mgl.BLEND)
         self.ctx.gc_mode = 'auto'
 
         self.clock = pg.time.Clock()
