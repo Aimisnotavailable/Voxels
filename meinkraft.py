@@ -61,6 +61,7 @@ class VoxelEngine:
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     self.is_running = False
+            self.player.handle_event(event=event)
 
     def run(self):
         while self.is_running:
