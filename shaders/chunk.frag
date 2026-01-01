@@ -2,7 +2,7 @@
 
 layout (location=0) out vec4 fragColor;
 
-uniform sampler2D u_texture_0;
+uniform sampler2DArray u_texture_array_0;
 
 // remember to use linear gamma corrections for textures
 const vec3 gamma = vec3(2.2);
@@ -12,11 +12,19 @@ in vec3 voxel_color;
 in vec2 uv;
 in float shading;
 
+flat in int voxel_id;
+flat in int face_id;
+
 void main(){
-    vec3 tex_col = texture(u_texture_0, uv).rgb;
+
+    // accounts for the flipping for ambient occlusion
+    vec2 face_uv = uv;
+    face_uv.x = uv.x / 3.0 - min(face_id, 2) / 3.0;
+
+    vec3 tex_col = texture(u_texture_array_0, vec3(face_uv, voxel_id)).rgb;
     tex_col = pow(tex_col, gamma);
 
-    tex_col.rgb *= voxel_color;
+    // tex_col.rgb *= voxel_color;
     // tex_col = tex_col * 0.001 + vec3(1);
     tex_col *= shading;
 
