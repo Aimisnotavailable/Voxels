@@ -40,7 +40,7 @@ class Chunk:
                 # World Coordinates
                 wx = x + cx
                 wz = z + cz
-                world_height = int(glm.simplex(glm.vec2(wx, wz)* 0.01) * 32 + 32)
+                world_height = int(glm.simplex(glm.vec2(wx, wz)* 0.014) * 32 + 32)
                 local_height = min(world_height - cy, CHUNK_SIZE)
                 for y in range(local_height):
                     wy = y + cy
