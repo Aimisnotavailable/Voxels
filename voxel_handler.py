@@ -1,6 +1,7 @@
 from settings import *
 from meshes.chunk_mesh_builder import get_chunk_index
 
+
 class VoxelHandler:
     def __init__(self, world):
         self.engine = world.engine
@@ -12,45 +13,45 @@ class VoxelHandler:
         self.voxel_index = None
         self.voxel_local_pos = None
         self.voxel_world_pos = None
-        self.voxel_nomral = None
+        self.voxel_normal = None
 
-        self.interaction_mode = 0 # 0: remove_voxel 1: add voxel
-        self.new_voxel_id = 1
+        self.interaction_mode = 0  # 0: remove voxel   1: add voxel
+        self.new_voxel_id = DIRT
 
     def add_voxel(self):
         if self.voxel_id:
             # check voxel id along normal
-            # normal refers to the 90deg adjacent voxel with length unit 1
             result = self.get_voxel_id(self.voxel_world_pos + self.voxel_normal)
-            
+
             # is the new place empty?
             if not result[0]:
                 _, voxel_index, _, chunk = result
                 chunk.voxels[voxel_index] = self.new_voxel_id
                 chunk.mesh.rebuild()
 
-                # was it an empty chunk?
+                # was it an empty chunk
                 if chunk.is_empty:
                     chunk.is_empty = False
+
     def rebuild_adj_chunk(self, adj_voxel_pos):
         index = get_chunk_index(adj_voxel_pos)
         if index != -1:
             self.chunks[index].mesh.rebuild()
-    
+
     def rebuild_adjacent_chunks(self):
         lx, ly, lz = self.voxel_local_pos
         wx, wy, wz = self.voxel_world_pos
-        
+
         if lx == 0:
             self.rebuild_adj_chunk((wx - 1, wy, wz))
         elif lx == CHUNK_SIZE - 1:
             self.rebuild_adj_chunk((wx + 1, wy, wz))
-        
+
         if ly == 0:
             self.rebuild_adj_chunk((wx, wy - 1, wz))
         elif ly == CHUNK_SIZE - 1:
             self.rebuild_adj_chunk((wx, wy + 1, wz))
-        
+
         if lz == 0:
             self.rebuild_adj_chunk((wx, wy, wz - 1))
         elif lz == CHUNK_SIZE - 1:
@@ -59,12 +60,12 @@ class VoxelHandler:
     def remove_voxel(self):
         if self.voxel_id:
             self.chunk.voxels[self.voxel_index] = 0
-            self.chunk.mesh.rebuild()
 
+            self.chunk.mesh.rebuild()
             self.rebuild_adjacent_chunks()
 
     def set_voxel(self):
-        if  self.interaction_mode:
+        if self.interaction_mode:
             self.add_voxel()
         else:
             self.remove_voxel()
@@ -132,7 +133,7 @@ class VoxelHandler:
                     max_z += delta_z
                     step_dir = 2
         return False
-    
+
     def get_voxel_id(self, voxel_world_pos):
         cx, cy, cz = chunk_pos = voxel_world_pos / CHUNK_SIZE
 
@@ -141,8 +142,9 @@ class VoxelHandler:
             chunk = self.chunks[chunk_index]
 
             lx, ly, lz = voxel_local_pos = voxel_world_pos - chunk_pos * CHUNK_SIZE
+
             voxel_index = lx + CHUNK_SIZE * lz + CHUNK_AREA * ly
             voxel_id = chunk.voxels[voxel_index]
-            
+
             return voxel_id, voxel_index, voxel_local_pos, chunk
         return 0, 0, 0, 0

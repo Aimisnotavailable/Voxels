@@ -11,7 +11,6 @@ class ShaderProgram:
         self.voxel_marker = self.get_program(shader_name='voxel_marker')
         self.water = self.get_program('water')
         self.clouds = self.get_program('clouds')
-        self.quad  = self.get_program('quad')
         # ------------------------- #
         self.set_uniforms_on_init()
 
