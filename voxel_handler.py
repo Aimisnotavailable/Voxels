@@ -16,8 +16,8 @@ class VoxelHandler:
         self.voxel_normal = None
 
         self.interaction_mode = 0  # 0: remove voxel   1: add voxel
-        self.new_voxel_id = DIRT
-
+        self.new_voxel_id = WOOD
+        
     def add_voxel(self):
         if self.voxel_id:
             # check voxel id along normal
@@ -59,6 +59,7 @@ class VoxelHandler:
 
     def remove_voxel(self):
         if self.voxel_id:
+            print("HEHE")
             self.chunk.voxels[self.voxel_index] = 0
 
             self.chunk.mesh.rebuild()

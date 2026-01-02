@@ -25,7 +25,6 @@ class Chunk:
         self.mesh.program['m_model'].write(self.m_model)
 
     def build_mesh(self):
-        
         self.mesh = ChunkMesh(self)
 
     def render(self):

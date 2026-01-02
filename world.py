@@ -20,16 +20,20 @@ class World:
         with open(CHUNK_FILE_BASE_DIR / Path(f'world{CHUNK_FILE_FORMAT}'), 'r+') as fp:
             packed_data = json.load(fp)
             unpacked_voxels_data = VoxelUnpacker().unpack(packed_data['voxels'])
-            for idx in range(WORLD_VOL):
-            
-                chunk = Chunk(self, position=packed_data['chunk_pos'][idx])
-                chunk_voxels = unpacked_voxels_data[idx]
-                chunk.is_empty = False
+            for x in range(WORLD_W):
+                for y in range(WORLD_H):
+                    for z in range(WORLD_D):
+                        idx = x + WORLD_W * z + WORLD_AREA * y
+                        chunk = Chunk(self, position=packed_data['chunk_pos'][idx])
 
-                self.chunks[idx] = chunk
-                self.voxels[idx] = chunk_voxels
+                        chunk_voxels = unpacked_voxels_data[idx]
+                        
+                        self.chunks[idx] = chunk
+                        self.voxels[idx] = chunk_voxels
 
-                chunk.voxels = chunk_voxels
+                        chunk.voxels = self.voxels[idx]
+                        if np.any(chunk_voxels):
+                            chunk.is_empty = False
         # print(self.chunks[idx].voxels)
 
     def save_chunk_file(self):
