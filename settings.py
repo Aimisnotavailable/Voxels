@@ -2,6 +2,12 @@ from numba import njit
 import numpy as np
 import glm
 import math
+import json
+from pathlib import Path
+
+# File format
+CHUNK_FILE_FORMAT = ".json"
+CHUNK_FILE_BASE_DIR =  Path(f'world_data/chunks')
 
 # OpenGL settings
 MAJOR_VER, MINOR_VER = 3, 3
@@ -25,7 +31,7 @@ CHUNK_VOL = CHUNK_AREA * CHUNK_SIZE
 CHUNK_SPHERE_RADIUS = H_CHUNK_SIZE * math.sqrt(3)
 
 # world
-WORLD_W, WORLD_H = 100, 3
+WORLD_W, WORLD_H = 40, 3
 WORLD_D = WORLD_W
 WORLD_AREA = WORLD_W * WORLD_D
 WORLD_VOL = WORLD_AREA * WORLD_H
