@@ -7,6 +7,7 @@ from scene import Scene
 from player import Player
 from textures import Textures
 
+# FIX THE JSON CHUNK DICT CRAP
 class VoxelEngine:
 
     def __init__(self):
