@@ -141,11 +141,11 @@ class VoxelHandler:
         if 0 <= cx < WORLD_W and 0 <= cy < WORLD_H and 0 <= cz < WORLD_D:
             chunk_index = cx + WORLD_W * cz + WORLD_AREA * cy
             chunk = self.chunks[chunk_index]
+            if not chunk is None:
+                lx, ly, lz = voxel_local_pos = voxel_world_pos - chunk_pos * CHUNK_SIZE
 
-            lx, ly, lz = voxel_local_pos = voxel_world_pos - chunk_pos * CHUNK_SIZE
+                voxel_index = lx + CHUNK_SIZE * lz + CHUNK_AREA * ly
+                voxel_id = chunk.voxels[voxel_index]
 
-            voxel_index = lx + CHUNK_SIZE * lz + CHUNK_AREA * ly
-            voxel_id = chunk.voxels[voxel_index]
-
-            return voxel_id, voxel_index, voxel_local_pos, chunk
+                return voxel_id, voxel_index, voxel_local_pos, chunk
         return 0, 0, 0, 0

@@ -1,3 +1,4 @@
 .env
 __pycache__
 block
+world_data/chunks/world.dat

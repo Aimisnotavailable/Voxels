@@ -1,85 +1,74 @@
-from settings import *
-class VoxelPacker:
-    def to_str(self, num: int) -> str:
-        # map 0..61 -> '0'-'9', 'a'-'z', 'A'-'Z'
-        if 0 <= num <= 9:
-            return chr(ord('0') + num)
-        if 10 <= num <= 35:
-            return chr(ord('a') + (num - 10))
-        if 36 <= num <= 61:
-            return chr(ord('A') + (num - 36))
-        raise ValueError("to_str: num out of range 0..61")
+import struct
+import numpy as np
+from pathlib import Path
 
-    def encode_count_base62(self, count: int) -> str:
-        if count <= 0:
-            return self.to_str(0)
-        digits = []
-        while count > 0:
-            digits.append(self.to_str(count % 62))
-            count //= 62
-        digits.reverse()
-        return ''.join(digits)
+CHUNK_HEADER_FMT = "<I"   # uint32 length of block in bytes
+RUN_FMT = "<I B"          # uint32 count, uint8 id
+RUN_SIZE = struct.calcsize(RUN_FMT)
+def pack_chunk_to_bytes(chunk_voxels: np.ndarray) -> bytes:
+    if chunk_voxels.size == 0:
+        return b''
+    parts = []
+    curr = int(chunk_voxels[0])
+    cnt = 1
+    for v in chunk_voxels[1:]:
+        v = int(v)
+        if v == curr:
+            cnt += 1
+        else:
+            parts.append(struct.pack(RUN_FMT, cnt, curr))
+            curr = v
+            cnt = 1
+    parts.append(struct.pack(RUN_FMT, cnt, curr))
+    return b''.join(parts)
 
-    def pack_voxel_data(self, voxels):
+def unpack_chunk_from_bytes(data: bytes) -> np.ndarray:
+    if not data:
+        return np.empty(0, dtype=np.uint8)
+    n_runs = len(data) // RUN_SIZE
+    # view as array of runs
+    runs = np.frombuffer(data, dtype=np.uint8).reshape(-1)  # fallback
+    # safer: iterate runs but it's still fast because it's binary
+    out = []
+    offset = 0
+    while offset + RUN_SIZE <= len(data):
+        cnt, vid = struct.unpack_from(RUN_FMT, data, offset)
+        out.append((cnt, vid))
+        offset += RUN_SIZE
+    # preallocate
+    total = sum(cnt for cnt, _ in out)
+    arr = np.empty(total, dtype=np.uint8)
+    pos = 0
+    for cnt, vid in out:
+        arr[pos:pos+cnt] = vid
+        pos += cnt
+    return arr
 
-        packed_voxels = []
+def save_world(path: Path, chunks: list):
+    with open(path, "wb") as f:
+        # write index: number of chunks then for each chunk: offset (uint64)
+        f.write(struct.pack("<I", len(chunks)))
+        index_pos = f.tell()
+        f.write(b'\x00' * (8 * len(chunks)))  # placeholder offsets
+        offsets = []
+        for i, chunk in enumerate(chunks):
+            offsets.append(f.tell())
+            data = pack_chunk_to_bytes(chunk)
+            f.write(struct.pack(CHUNK_HEADER_FMT, len(data)))
+            f.write(data)
+        # go back and write offsets
+        f.seek(index_pos)
+        for off in offsets:
+            f.write(struct.pack("<Q", off))
 
-        for chunk_voxels in voxels:
-            if not chunk_voxels:
-                packed_voxels.append('')  # keep chunk alignment
-                continue
+def load_chunk_by_index(path: Path, idx: int) -> np.ndarray:
+    with open(path, "rb") as f:
+        n_chunks = struct.unpack("<I", f.read(4))[0]
+        f.seek(4 + idx * 8)
+        off = struct.unpack("<Q", f.read(8))[0]
+        f.seek(off)
+        length = struct.unpack(CHUNK_HEADER_FMT, f.read(4))[0]
+        data = f.read(length)
+        return unpack_chunk_from_bytes(data)
 
-            curr_voxel_id = chunk_voxels[0]
-            counter = 1
-            parts = []
-
-            for voxel in chunk_voxels[1:]:
-                if voxel == curr_voxel_id:
-                    counter += 1
-                else:
-                    parts.append(f';{self.encode_count_base62(counter)}-{curr_voxel_id}')
-                    curr_voxel_id = voxel
-                    counter = 1
-
-            # flush last run for this chunk
-            parts.append(f';{self.encode_count_base62(counter)}-{curr_voxel_id}')
-            packed_voxels.append(''.join(parts))
-
-        return packed_voxels
-
-class VoxelUnpacker:
-    
-    def _digit_from_char(self, ch: str) -> int:
-        if '0' <= ch <= '9':
-            return ord(ch) - ord('0')
-        if 'a' <= ch <= 'z':
-            return ord(ch) - ord('a') + 10
-        if 'A' <= ch <= 'Z':
-            return ord(ch) - ord('A') + 36
-        raise ValueError(f"Invalid base62 digit: {ch}")
-
-    def decode_count_base62(self, s: str) -> int:
-
-        if s == '':
-            return 0
-        value = 0
-        for ch in s:
-            value = value * 62 + self._digit_from_char(ch)
-        return value
-    
-    def unpack(self, voxels_data):
-        world_voxels = []
-        for chunk_voxels in voxels_data:
-            parts = []
-            for voxel_data in chunk_voxels.split(';')[1:]:
-                voxel_count, voxel_id = voxel_data.split('-')
-                count = self.decode_count_base62(voxel_count)
-                parts.append(np.full(count, int(voxel_id), dtype=np.uint8))
-            chunk = np.concatenate(parts) if parts else np.empty(0, dtype=np.uint8)
-            world_voxels.append(chunk)
-        return np.array(world_voxels, dtype=np.uint8)
-
-    
-# with open(CHUNK_FILE_BASE_DIR / Path(f'world{CHUNK_FILE_FORMAT}'), 'r+') as fp:
-#     packed_data = json.load(fp)
-#     print(len(VoxelUnpacker().unpack(packed_data['voxels'])))
+# print(load_chunk_by_index(Path("world_data/chunks/world.dat"), 0))

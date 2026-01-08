@@ -4,6 +4,7 @@ import glm
 import math
 import json
 from pathlib import Path
+RENDER_DISTANCE = 8
 
 # File format
 CHUNK_FILE_FORMAT = ".json"
@@ -31,7 +32,7 @@ CHUNK_VOL = CHUNK_AREA * CHUNK_SIZE
 CHUNK_SPHERE_RADIUS = H_CHUNK_SIZE * math.sqrt(3)
 
 # world
-WORLD_W, WORLD_H = 40, 3
+WORLD_W, WORLD_H = 60, 3
 WORLD_D = WORLD_W
 WORLD_AREA = WORLD_W * WORLD_D
 WORLD_VOL = WORLD_AREA * WORLD_H
