@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 class World:
-    def __init__(self, engine, new_world=False):
+    def __init__(self, engine, new_world=True):
         self.engine = engine
         self.chunks = [None for _ in range(WORLD_VOL)]
         self.voxels = np.empty([WORLD_VOL, CHUNK_VOL], dtype='uint8')
@@ -139,7 +139,7 @@ class World:
 
                     # get pointer to voxels
                     chunk.voxels = self.voxels[chunk_index]
-        save_world(CHUNK_FILE_BASE_DIR /  "world.dat", self.voxels)
+        # save_world(CHUNK_FILE_BASE_DIR /  "world.dat", self.voxels)
 
     def build_chunk_mesh(self):
         for chunk in self.chunks:

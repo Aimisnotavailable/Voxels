@@ -5,6 +5,7 @@ from pathlib import Path
 CHUNK_HEADER_FMT = "<I"   # uint32 length of block in bytes
 RUN_FMT = "<I B"          # uint32 count, uint8 id
 RUN_SIZE = struct.calcsize(RUN_FMT)
+
 def pack_chunk_to_bytes(chunk_voxels: np.ndarray) -> bytes:
     if chunk_voxels.size == 0:
         return b''
