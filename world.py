@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 class World:
-    def __init__(self, engine, new_world=True):
+    def __init__(self, engine, new_world=False):
         self.engine = engine
         self.chunks = [None for _ in range(WORLD_VOL)]
         self.voxels = np.empty([WORLD_VOL, CHUNK_VOL], dtype='uint8')
