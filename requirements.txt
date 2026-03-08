@@ -3,3 +3,4 @@ moderngl
 PyGLM
 numba
 opensimplex
+numba

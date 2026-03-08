@@ -59,7 +59,6 @@ class VoxelHandler:
 
     def remove_voxel(self):
         if self.voxel_id:
-            print("HEHE")
             self.chunk.voxels[self.voxel_index] = 0
 
             self.chunk.mesh.rebuild()
@@ -113,6 +112,7 @@ class VoxelHandler:
                     self.voxel_normal.y = -dy
                 else:
                     self.voxel_normal.z = -dz
+                print(self.voxel_normal)
                 return True
 
             if max_x < max_y:

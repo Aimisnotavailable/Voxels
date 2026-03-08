@@ -18,7 +18,8 @@ class World:
 
     def update(self):
         if not self.new_world:
-            x, y, z = (int(self.engine.player.position[0] // CHUNK_SIZE), int(self.engine.player.position[1] // CHUNK_SIZE), int(self.engine.player.position[2] // CHUNK_SIZE))
+            player_pos = self.engine.player.position
+            x, y, z = (int(player_pos[0] // CHUNK_SIZE), int(player_pos[1] // CHUNK_SIZE), int(player_pos[2] // CHUNK_SIZE))
             self.load_visible_chunks(x, y, z)
         self.voxel_handler.update()
     
@@ -139,7 +140,7 @@ class World:
 
                     # get pointer to voxels
                     chunk.voxels = self.voxels[chunk_index]
-        # save_world(CHUNK_FILE_BASE_DIR /  "world.dat", self.voxels)
+        save_world(CHUNK_FILE_BASE_DIR /  "world.dat", self.voxels)
 
     def build_chunk_mesh(self):
         for chunk in self.chunks:
